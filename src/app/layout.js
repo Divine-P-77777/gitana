@@ -1,12 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,29 +24,13 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950 text-white`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950 text-white min-h-screen flex flex-col`}
         >
-          {/* Minimal Auth Bar (Optional but clean) */}
-          <div className="flex justify-end p-4">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="mr-3 text-sm px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800">
-                  Sign In
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="text-sm px-4 py-2 rounded-lg bg-white text-black hover:bg-neutral-200">
-                  Sign Up
-                </button>
-              </SignUpButton>
-            </SignedOut>
-
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </div>
-
-          {children}
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
         </body>
       </html>
     </ClerkProvider>

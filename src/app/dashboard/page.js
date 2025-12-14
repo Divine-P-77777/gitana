@@ -14,7 +14,6 @@ import { Line } from "react-chartjs-2";
 
 import { useUser } from "@clerk/nextjs";
 
-const { user } = useUser();
 
 ChartJS.register(
     LineElement,
@@ -25,6 +24,7 @@ ChartJS.register(
 );
 
 export default function DashboardPage() {
+    const { user } = useUser();
     const [repoUrl, setRepoUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -35,25 +35,6 @@ export default function DashboardPage() {
     const [roadmap, setRoadmap] = useState("");
 
 
-    if (user) {
-        await fetch("/api/history/save", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                repo: {
-                    owner,
-                    name: repo,
-                    url: repoUrl,
-                },
-                signals,
-                ai: {
-                    score,
-                    summary,
-                    roadmap,
-                },
-            }),
-        });
-    }
 
     // -----------------------------
     // Main handler
@@ -63,6 +44,10 @@ export default function DashboardPage() {
             setError("Please enter a GitHub repository URL");
             return;
         }
+
+
+
+
 
         setError("");
         setLoading(true);
@@ -111,6 +96,29 @@ export default function DashboardPage() {
             setScore(scoreData.output);
             setSummary(summaryData.output);
             setRoadmap(roadmapData.output);
+
+            const repoDetails = fetchData.signals ? {
+                owner: fetchData.owner,
+                name: fetchData.repo,
+                url: repoUrl,
+            } : null;
+
+            if (user && repoDetails) {
+                // FIRE AND FORGET - save history without blocking UI
+                fetch("/api/history/save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        repo: repoDetails,
+                        signals: repoSignals,
+                        ai: {
+                            score: scoreData.output,
+                            summary: summaryData.output,
+                            roadmap: roadmapData.output,
+                        },
+                    }),
+                }).catch(err => console.error("Failed to save history:", err));
+            }
         } catch (err) {
             console.error(err);
             setError("Something went wrong. Please try another repo.");
