@@ -113,6 +113,9 @@ function buildSignals({
             files.some((f) => f.path === "package.json")
                 ? "web application"
                 : "general project",
+
+        // New: Raw commit history for graphing
+        weekly_commits: commitsPerWeek.reverse(), // Reverse to show chronological order if needed (GitHub API returns newest first usually, but check logic)
     };
 }
 

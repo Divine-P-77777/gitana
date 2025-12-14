@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🚀 Gitana — AI GitHub Repository Analyzer
 
-## Getting Started
+**Gitana** is an AI-powered system that evaluates GitHub repositories and converts them into a **Score, Summary, and Personalized Roadmap** — just like feedback from a senior developer or recruiter.
 
-First, run the development server:
+🌐 **Live Demo:** https://gitana.vercel.app  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎯 Problem Statement
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+A GitHub repository is a developer’s real portfolio, but most students don’t know:
+- How clean their code looks
+- Whether their project structure is industry-ready
+- What exactly they should improve next
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Gitana acts as a **“Repository Mirror”**, reflecting strengths, weaknesses, and actionable improvements using AI.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🧠 Core Idea & Approach
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Gitana follows a **signal-based evaluation approach** instead of reading raw code line by line.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🔹 Step-by-Step Approach
 
-## Deploy on Vercel
+1. **User submits a GitHub repository URL**
+   - Public repositories can be analyzed without login
+   - Logged-in users can view history and analyze private repos (GitHub OAuth)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Backend fetches repository data using GitHub APIs**
+   - Repository metadata
+   - Languages used
+   - File & folder structure
+   - README & documentation
+   - Commit history and frequency
+   - Tooling (tests, CI/CD, linting)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Raw GitHub data is converted into structured signals**
+   - File count & folder depth
+   - Presence of `src/`, `tests/`, `docs/`
+   - README quality
+   - Commit consistency
+   - Automation & tooling indicators
+
+4. **AI evaluates the repository**
+   - The AI does **not parse raw source code**
+   - It reasons on repository signals like a mentor or recruiter
+   - Generates:
+     - Score (0–100)
+     - Short evaluation summary
+     - Personalized improvement roadmap
+
+5. **Visual Insights**
+   - Commit history & streaks displayed using charts
+   - Helps understand development consistency
+
+---
+
+## 🧩 Tech Stack
+
+- **Frontend:** Next.js (App Router)
+- **Authentication:** Clerk
+- **Database:** MongoDB
+- **AI:** GitHub Marketplace LLM (OpenAI)
+- **Charts:** Graph.js
+- **APIs:** GitHub REST API
+
+---
+
+## 🔐 Authentication & Tokens
+
+### 🔹 GitHub Personal Access Token (Required)
+
+Gitana uses the GitHub API to fetch repository data.  
+You need to generate a **GitHub Personal Access Token (PAT)**.
+
+#### How to Create a GitHub Token:
+1. Go to **GitHub → Settings**
+2. Open **Developer settings**
+3. Click **Personal access tokens**
+4. Generate a new token (classic)
+5. Enable scopes:
+   - `repo` (for private repositories)
+   - `read:user`
+6. Copy and store the token securely
+
+Add it to your environment variables:
+
+```env
+GITHUB_TOKEN=your_personal_access_token
+MONGODB_URI=your_mongodb_connection_string
+CLERK_SECRET_KEY=your_clerk_secret_key
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
