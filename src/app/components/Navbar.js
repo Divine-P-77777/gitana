@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
@@ -8,8 +9,19 @@ export default function Navbar() {
         <nav className="border-b border-neutral-800 bg-neutral-950/50 backdrop-blur-md sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="text-xl font-bold bg-gradient-to-r from-white to-neutral-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-                    Gitana
+
+                <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                    {/* <div className="relative w-8 h-8 bg-white rounded-full overflow-hidden"> */}
+                    <img
+                        src="/logo.png"
+                        alt="Gitana Logo"
+                        // fill
+                        className="object-contain w-12 p-0.5"
+                    />
+                    {/* </div> */}
+                    <span className="text-xl font-bold bg-gradient-to-r from-white to-neutral-500 bg-clip-text text-transparent">
+                        Gitana
+                    </span>
                 </Link>
 
                 {/* Navigation Links */}

@@ -2,7 +2,7 @@
 
 **Gitana** is an AI-powered system that evaluates GitHub repositories and converts them into a **Score, Summary, and Personalized Roadmap** — just like feedback from a senior developer or recruiter.
 
-🌐 **Live Demo:** https://gitana.vercel.app  
+🌐 **Live Demo:** https://git-ana.vercel.app 
 
 ---
 

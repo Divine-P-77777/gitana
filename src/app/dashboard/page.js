@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Download } from "lucide-react";
+import { toPng } from "html-to-image";
+
+// Components
 import CommitChart from "../components/CommitChart";
 import Skeleton from "../components/Skeleton";
+import ScoreCard from "../components/ScoreCard";
+import RepoOverview from "../components/RepoOverview";
+import MentorFeedback from "../components/MentorFeedback";
+import Roadmap from "../components/Roadmap";
 
 export default function DashboardPage() {
     const { user } = useUser();
@@ -18,6 +24,8 @@ export default function DashboardPage() {
     const [summary, setSummary] = useState("");
     const [roadmap, setRoadmap] = useState("");
     const [level, setLevel] = useState("");
+
+    const reportRef = useRef(null);
 
     // -----------------------------
     // Main handler
@@ -32,7 +40,6 @@ export default function DashboardPage() {
         setLoading(true);
         setSignals(null);
         setScore("");
-        setSummary("");
         setSummary("");
         setRoadmap("");
         setLevel("");
@@ -84,7 +91,6 @@ export default function DashboardPage() {
             setSummary(summaryData.output);
             setRoadmap(roadmapData.output);
 
-            // understandingData.output is a JSON string, we need to parse it
             try {
                 const understandingJson = JSON.parse(understandingData.output);
                 setLevel(understandingJson.maturity_level || "Unknown");
@@ -100,7 +106,6 @@ export default function DashboardPage() {
             } : null;
 
             if (user && repoDetails) {
-                // FIRE AND FORGET - save history without blocking UI
                 fetch("/api/history/save", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -123,13 +128,34 @@ export default function DashboardPage() {
         }
     }
 
-    // Prepare chart data using the weekly_commits from backend if available
+    // Prepare chart data
     const chartData = signals?.weekly_commits
         ? {
             labels: signals.weekly_commits.map((_, i) => `Week ${i + 1}`),
             values: signals.weekly_commits,
         }
         : null;
+
+    // Download handler
+    const handleDownload = async () => {
+        if (!reportRef.current) return;
+
+        try {
+            const dataUrl = await toPng(reportRef.current, {
+                backgroundColor: "#0a0a0a",
+                cacheBust: true,
+                pixelRatio: 2,
+            });
+
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = `gitana-report-${new Date().toISOString().slice(0, 10)}.png`;
+            link.click();
+        } catch (err) {
+            console.error("Download failed:", err);
+            alert("Failed to download report. Please check the console for details.");
+        }
+    };
 
     return (
         <div className="min-h-screen bg-neutral-950 text-white px-6 py-10">
@@ -151,120 +177,60 @@ export default function DashboardPage() {
                         placeholder="https://github.com/user/repo"
                         value={repoUrl}
                         onChange={(e) => setRepoUrl(e.target.value)}
-                        className="flex-1 rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-3 outline-none focus:border-neutral-600"
+                        className="flex-1 rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-3 outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 transition-all placeholder:text-neutral-600"
                     />
                     <button
                         onClick={analyzeRepo}
                         disabled={loading}
-                        className="rounded-lg bg-white text-black px-6 py-3 font-medium hover:bg-neutral-200 disabled:opacity-50"
+                        className="rounded-lg bg-white text-black px-6 py-3 font-medium hover:bg-neutral-200 disabled:opacity-50 transition-colors"
                     >
                         {loading ? "Analyzing..." : "Analyze"}
                     </button>
                 </div>
 
                 {error && (
-                    <div className="text-red-400 text-sm">{error}</div>
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                        {error}
+                    </div>
                 )}
 
-                {/* Results - Show either Loading Skeletons or Actual Data */}
+                {/* Results Section */}
                 {(loading || signals) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Score */}
-                        <div className="rounded-xl bg-neutral-900 p-6 border border-neutral-800">
-                            <h2 className="text-xl font-semibold mb-2">Score</h2>
-                            {loading && !score ? (
-                                <div className="space-y-2">
-                                    <Skeleton className="h-10 w-24" />
-                                    <Skeleton className="h-4 w-16" />
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-1">
-                                    <div className="flex items-baseline gap-3">
-                                        <p className="text-4xl font-bold">{score}</p>
-                                        <span className="text-neutral-500 text-sm">/ 100</span>
-                                    </div>
-                                    {level && (
-                                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 w-fit">
-                                            {level}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                    <div className="space-y-6">
+                        {/* Download Prompt */}
+                        {!loading && score && (
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={handleDownload}
+                                    className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+                                >
+                                    <Download className="w-4 h-4" />
+                                    Download Report
+                                </button>
+                            </div>
+                        )}
 
-                        {/* Signals Snapshot */}
-                        <div className="rounded-xl bg-neutral-900 p-6 border border-neutral-800">
-                            <h2 className="text-xl font-semibold mb-4">
-                                Repository Overview
-                            </h2>
-                            {loading && !signals ? (
-                                <div className="space-y-2">
-                                    <Skeleton className="h-4 w-3/4" />
-                                    <Skeleton className="h-4 w-1/2" />
-                                    <Skeleton className="h-4 w-2/3" />
-                                </div>
-                            ) : (
-                                signals && (
-                                    <ul className="text-sm space-y-1 text-neutral-300">
-                                        <li>Primary Language: {signals.primary_language}</li>
-                                        <li>Files: {signals.file_count}</li>
-                                        <li>Folders Depth: {signals.folder_depth}</li>
-                                        <li>README Present: {signals.readme_present ? "Yes" : "No"}</li>
-                                        <li>Tests Folder: {signals.has_tests_folder ? "Yes" : "No"}</li>
-                                    </ul>
-                                )
-                            )}
-                        </div>
+                        {/* Report Container (captured for download) */}
+                        <div ref={reportRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-neutral-950 p-4 rounded-xl">
+                            <ScoreCard loading={loading} score={score} level={level} />
 
-                        {/* Summary */}
-                        <div className="rounded-xl bg-neutral-900 p-6 border border-neutral-800 md:col-span-2">
-                            <h2 className="text-xl font-semibold mb-2">Mentor Feedback</h2>
-                            {loading && !summary ? (
-                                <div className="space-y-2">
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-3/4" />
-                                </div>
-                            ) : (
-                                <div className="text-neutral-300 prose prose-invert max-w-none">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {summary}
-                                    </ReactMarkdown>
-                                </div>
-                            )}
-                        </div>
+                            <RepoOverview loading={loading} signals={signals} />
 
-                        {/* Roadmap */}
-                        <div className="rounded-xl bg-neutral-900 p-6 border border-neutral-800 md:col-span-2">
-                            <h2 className="text-xl font-semibold mb-2">
-                                Improvement Roadmap
-                            </h2>
-                            {loading && !roadmap ? (
-                                <div className="space-y-4">
-                                    <Skeleton className="h-6 w-1/3 mb-2" />
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-2/3" />
-                                </div>
-                            ) : (
-                                <div className="text-neutral-300 prose prose-invert max-w-none text-sm">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {roadmap}
-                                    </ReactMarkdown>
-                                </div>
-                            )}
-                        </div>
+                            <MentorFeedback loading={loading} summary={summary} />
 
-                        {/* Chart */}
-                        <div className="rounded-xl bg-neutral-900 p-6 border border-neutral-800 md:col-span-2">
-                            <h2 className="text-xl font-semibold mb-4">
-                                Commit Activity
-                            </h2>
-                            {loading && !chartData ? (
-                                <Skeleton className="h-64 w-full" />
-                            ) : (
-                                chartData && <CommitChart data={chartData} />
-                            )}
+                            <Roadmap loading={loading} roadmap={roadmap} />
+
+                            {/* Chart */}
+                            <div className="rounded-xl bg-neutral-900 p-6 border border-neutral-800 md:col-span-2">
+                                <h2 className="text-xl font-semibold mb-4 text-neutral-200">
+                                    Commit Activity
+                                </h2>
+                                {loading && !chartData ? (
+                                    <Skeleton className="h-64 w-full" />
+                                ) : (
+                                    chartData && <CommitChart data={chartData} />
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}

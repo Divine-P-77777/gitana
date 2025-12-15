@@ -16,7 +16,34 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Gitana — AI GitHub Project Mentor",
-  description: "AI-powered GitHub repository analysis and mentorship",
+  description: "Get mentor-style feedback on any public GitHub repository. Analyze structure, code quality, and documentation with AI.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Gitana — AI GitHub Project Mentor",
+    description: "Get mentor-style feedback on any public GitHub repository. Analyze structure, code quality, and documentation with AI.",
+    url: "https://git-ana.vercel.app",
+    siteName: "Gitana",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 600,
+        alt: "Gitana Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gitana — AI GitHub Project Mentor",
+    description: "Get mentor-style feedback on any public GitHub repository. Analyze structure, code quality, and documentation with AI.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({ children }) {

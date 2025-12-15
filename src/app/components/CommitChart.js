@@ -43,17 +43,24 @@ export default function CommitChart({ data }) {
     // I'll make it accepting `labels` and `values` props.
 
     const chartData = {
-        labels: data.labels || ["Average"],
+        labels: data.labels || [],
         datasets: [
             {
                 label: "Commits",
                 data: data.values || [],
                 tension: 0.4,
                 borderColor: "#a855f7", // Purple-500
-                backgroundColor: "rgba(168, 85, 247, 0.2)",
+                backgroundColor: "rgba(168, 85, 247, 0.1)",
+                borderWidth: 3,
                 fill: true,
-                pointBackgroundColor: "#fff",
+                pointBackgroundColor: "#171717",
                 pointBorderColor: "#a855f7",
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: "#a855f7",
+                pointHoverBorderColor: "#fff",
+                pointHoverBorderWidth: 2,
             },
         ],
     };
@@ -61,26 +68,42 @@ export default function CommitChart({ data }) {
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+            duration: 1500,
+            easing: 'easeOutQuart',
+        },
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
         plugins: {
             legend: {
                 display: false,
             },
             tooltip: {
-                backgroundColor: "#171717",
+                backgroundColor: "rgba(23, 23, 23, 0.9)", // neutral-900
                 titleColor: "#fff",
-                bodyColor: "#a3a3a3",
-                borderColor: "#404040",
+                bodyColor: "#d4d4d4", // neutral-300
+                borderColor: "#404040", // neutral-700
                 borderWidth: 1,
+                padding: 10,
+                displayColors: false,
+                callbacks: {
+                    label: (context) => `Commits: ${context.parsed.y}`
+                }
             }
         },
         scales: {
             y: {
                 beginAtZero: true,
+                border: { dash: [4, 4] },
                 grid: {
-                    color: "#262626",
+                    color: "#262626", // neutral-800
+                    drawBorder: false,
                 },
                 ticks: {
-                    color: "#737373",
+                    color: "#737373", // neutral-500
+                    padding: 10,
                 }
             },
             x: {
@@ -88,7 +111,8 @@ export default function CommitChart({ data }) {
                     display: false,
                 },
                 ticks: {
-                    color: "#737373",
+                    color: "#737373", // neutral-500
+                    padding: 10,
                 }
             }
         }
